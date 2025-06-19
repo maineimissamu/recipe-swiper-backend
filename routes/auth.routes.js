@@ -25,7 +25,7 @@ router.post('/register', async(req, res) => {
 
         const savedUser = await newUser.save();
 
-        const token = jwt.sign({id: savedUser._id}, process.env.JWT_SECRET, {expiresIn: '1h'});
+        const token = jwt.sign({id: savedUser._id}, process.env.JWT_SECRET, {expiresIn: '7d'});
 
         res.json({message: 'User registered successfully', user: savedUser, token});
 
