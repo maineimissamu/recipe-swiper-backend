@@ -1,6 +1,7 @@
 const express = require('express');
 const Recipe = require('../models/Recipe');
 const RecipeInteraction = require('../models/RecipeInteraction')
+const authMiddleware = require('../middleware/auth');
 const User = require('../models/User');
 
 const router = express.Router();
@@ -23,9 +24,10 @@ router.get('/', async(req, res) => {
     }
 })
 
-router.post('/like', async(req, res) => {
+router.post('/like', authMiddleware, async(req, res) => {
     try {
-        const { recipeId, userId } = req.body;
+        const { recipeId } = req.body;
+        const userId = req.userId;
 
         if(!userId || !recipeId) {
             return res.json({message: 'User ID and recipe ID are required'});
@@ -48,10 +50,11 @@ router.post('/like', async(req, res) => {
     }
 })
 
-router.post('/dislike', async(req, res) => {
+router.post('/dislike', authMiddleware, async(req, res) => {
     try {
 
-        const { recipeId, userId } = req.body;
+        const { recipeId } = req.body;
+        const userId = req.userId;
 
         if(!userId || !recipeId) {
             return res.json({message: 'User ID and recipe ID are required'});
@@ -75,9 +78,9 @@ router.post('/dislike', async(req, res) => {
     }
 });
 
-router.get('/liked/:userId', async(req, res) => {
+router.get('/liked', authMiddleware, async(req, res) => {
     try {
-        const {userId} = req.params;
+        const userId = req.userId;
 
         const likedRecipes = await RecipeInteraction.find({user: userId, interaction: 'like'}).populate('recipe');
 

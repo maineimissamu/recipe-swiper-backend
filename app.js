@@ -1,14 +1,18 @@
 const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
 const userRoutes = require('./routes/user.routes');
 const recipeRoutes = require('./routes/recipe.routes');
 const swipeRoutes = require('./routes/swipe.routes');
-const mongoose = require('mongoose');
+const authRoutes = require('./routes/auth.routes');
+require('dotenv').config();
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
-mongoose.connect('mongodb+srv://samuel-developer:chocolat3@cluster0.j0fdn.mongodb.net/recipe-swiper?retryWrites=true&w=majority&appName=Cluster0')
+mongoose.connect(process.env.MONGO_URI)
 .then(() => {
     console.log('Connected to MongoDB');
 })
@@ -23,6 +27,7 @@ app.get('/', (req, res) => {
 app.use('/users', userRoutes);
 app.use('/recipes', recipeRoutes);
 app.use('/swipe', swipeRoutes);
+app.use('/auth', authRoutes);
 
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
