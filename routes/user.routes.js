@@ -29,7 +29,6 @@ router.post('/', async (req, res) => {
     try {
         const { username, email, password } = req.body;
 
-        console.log(req.body);
 
         if(!username || !email || !password) {
             return res.json({ message: 'All fields are required' });
