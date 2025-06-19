@@ -46,5 +46,17 @@ router.post('/', authMiddleware, async (req, res) => {
     } catch(err) {
         res.json({ message: err.message });
     }
-})
+});
+
+router.get('/user/recipes', authMiddleware, async (req, res) => {
+    try {
+        const recipes = await Recipe.find({ author: req.userId })
+            .populate('author', 'username')
+            .sort({ createdAt: -1 });
+        res.json(recipes);
+    } catch(err) {
+        res.json({ message: err.message });
+    }
+});
+
 module.exports = router;
