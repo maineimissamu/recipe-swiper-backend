@@ -59,4 +59,51 @@ router.get('/user/recipes', authMiddleware, async (req, res) => {
     }
 });
 
+router.put('/:id', authMiddleware, async (req, res) => {
+    try {
+        const recipe = await Recipe.findById(req.params.id);
+
+        if(!recipe) {
+            return res.json({ message: 'Recipe not found' });
+        }
+
+        if(recipe.author.toString() !== req.userId) {
+            return res.json({ message: 'You are not authorized to update this recipe' });
+        }
+
+        const { title, description, image, ingredients, steps, cookingTime, servings, difficulty, category } = req.body;
+
+        if(!title || !description || !image || !ingredients || !steps || !cookingTime || !servings || !difficulty || !category) {
+            return res.json({ message: 'All fields are required' });
+        }
+
+        const updatedRecipe = await Recipe.findByIdAndUpdate(req.params.id, { title, description, image, ingredients, steps, cookingTime, servings, difficulty, category }, { new: true });
+        res.json(updatedRecipe);
+    } catch(err) {
+        res.json({ message: err.message });
+    }
+})
+
+router.delete('/:id', authMiddleware, async (req, res) => {
+    try {
+        const recipe = await Recipe.findById(req.params.id);
+
+        if(!recipe) {
+            return res.json({ message: 'Recipe not found' });
+        }
+
+        if(recipe.author.toString() !== req.userId) {
+            return res.json({ message: 'You are not authorized to delete this recipe' });
+        }
+
+        await Recipe.findByIdAndDelete(req.params.id);
+
+        await RecipeInteraction.deleteMany({ recipe: req.params.id });
+
+        res.json({ message: 'Recipe deleted successfully' });
+    } catch(err) {
+        res.json({ message: err.message });
+    }
+})
+
 module.exports = router;
