@@ -5,6 +5,7 @@ const userRoutes = require('./routes/user.routes');
 const recipeRoutes = require('./routes/recipe.routes');
 const swipeRoutes = require('./routes/swipe.routes');
 const authRoutes = require('./routes/auth.routes');
+const commentRoutes = require('./routes/comment.routes');
 require('dotenv').config();
 
 const app = express();
@@ -28,6 +29,7 @@ app.use('/users', userRoutes);
 app.use('/recipes', recipeRoutes);
 app.use('/swipe', swipeRoutes);
 app.use('/auth', authRoutes);
+app.use('/comments', commentRoutes);
 
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
