@@ -28,10 +28,12 @@ router.post('/', authMiddleware, async (req, res) => {
         if(!recipe) {
             return res.json({ message: 'Recipe not found' });
         }
-
+        
         const comment = new Comment({ recipe: recipeId, author, content });
         await comment.save();
-        res.json({message: 'Comment created successfully', comment});
+        const populatedComment = await comment.populate('author', 'username');
+        
+        res.json(populatedComment);
     } catch(err) {
         res.json({ message: err.message });
     }
