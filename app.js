@@ -31,8 +31,10 @@ app.use('/swipe', swipeRoutes);
 app.use('/auth', authRoutes);
 app.use('/comments', commentRoutes);
 
-app.listen(5023, () => {
-    console.log('Server is running on port 5023');
+const PORT = process.env.PORT || 5023;
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
 
 
