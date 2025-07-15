@@ -15,12 +15,12 @@ router.get('/', async(req, res) => {
         const randomRecipe = await Recipe.findOne().skip(random);
 
         if(!randomRecipe) {
-            return res.json({message: 'No recipes available'});
+            return res.status(404).json({message: 'No recipes available'});
         }
 
         res.json({recipe: randomRecipe});
     } catch(err) {
-        res.json({message: err.message})
+        res.status(500).json({message: err.message})
     }
 })
 
@@ -30,12 +30,12 @@ router.post('/like', authMiddleware, async(req, res) => {
         const userId = req.userId;
 
         if(!userId || !recipeId) {
-            return res.json({message: 'User ID and recipe ID are required'});
+            return res.status(400).json({message: 'User ID and recipe ID are required'});
         }
 
         const alreadyInteracted = await RecipeInteraction.findOne({recipe: recipeId, user: userId});
         if(alreadyInteracted) {
-            return res.json({message: 'You have already interacted with this recipe'});
+            return res.status(409).json({message: 'You have already interacted with this recipe'});
         }
 
         const interaction = new RecipeInteraction({recipe: recipeId, user: userId, interaction: 'like'});
@@ -46,7 +46,7 @@ router.post('/like', authMiddleware, async(req, res) => {
 
         res.json({message: 'Recipe liked successfully'});
     } catch(err) {
-        res.json({message: err.message})
+        res.status(500).json({message: err.message})
     }
 })
 
@@ -57,13 +57,13 @@ router.post('/dislike', authMiddleware, async(req, res) => {
         const userId = req.userId;
 
         if(!userId || !recipeId) {
-            return res.json({message: 'User ID and recipe ID are required'});
+            return res.status(400).json({message: 'User ID and recipe ID are required'});
         }
         
         const alreadyInteracted = await RecipeInteraction.findOne({recipe: recipeId, user: userId});
         
         if(alreadyInteracted) {
-            return res.json({message: 'You have already interacted with this recipe'});
+            return res.status(409).json({message: 'You have already interacted with this recipe'});
         }
 
         const interaction = new RecipeInteraction({recipe: recipeId, user: userId, interaction: 'dislike'});
@@ -74,19 +74,24 @@ router.post('/dislike', authMiddleware, async(req, res) => {
 
         res.json({message: 'Recipe disliked successfully'});
     } catch(err) {
-        res.json({message: err.message})
+        res.status(500).json({message: err.message})
     }
 });
 
 router.get('/liked', authMiddleware, async(req, res) => {
     try {
         const userId = req.userId;
+        
+        const likedInteractions = await RecipeInteraction.find({
+            user: userId,
+            interaction: 'like'
+        }).populate('recipe');
 
-        const likedRecipes = await RecipeInteraction.find({user: userId, interaction: 'like'}).populate('recipe');
+        const likedRecipes = likedInteractions.map(interaction => interaction.recipe);
 
         res.json({likedRecipes});
     } catch(err) {
-        res.json({message: err.message})
+        res.status(500).json({message: err.message})
     }
 });
 

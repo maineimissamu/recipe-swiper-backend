@@ -10,7 +10,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
     try {
         const recipe = await Recipe.findById(req.params.id).populate('author', 'username');
         if(!recipe) {
-            return res.json({ message: 'Recipe not found' });
+            return res.status(404).json({ message: 'Recipe not found' });
         }
 
         const isAuthor = recipe.author._id.toString() === req.userId;
@@ -22,12 +22,12 @@ router.get('/:id', authMiddleware, async (req, res) => {
         })
 
         if(!isAuthor && !isLiked) {
-            return res.json({ message: 'You are not authorized to view this recipe' });
+            return res.status(403).json({ message: 'You are not authorized to view this recipe' });
         }
 
         res.json(recipe);
     } catch(err) {
-        res.json({ message: err.message });
+        res.status(500).json({ message: err.message });
     }
 })
 
@@ -37,14 +37,14 @@ router.post('/', authMiddleware, async (req, res) => {
         const author = req.userId;
 
         if(!title || !description || !image || !ingredients || !steps || !cookingTime || !servings || !difficulty || !category) {
-            return res.json({ message: 'All fields are required' });
+            return res.status(400).json({ message: 'All fields are required' });
         }
 
         const newRecipe = new Recipe({ title, description, image, ingredients, steps, cookingTime, servings, difficulty, category, author });
         const savedRecipe = await newRecipe.save();
-        res.json(savedRecipe);
+        res.status(201).json(savedRecipe);
     } catch(err) {
-        res.json({ message: err.message });
+        res.status(500).json({ message: err.message });
     }
 });
 
@@ -55,7 +55,7 @@ router.get('/user/recipes', authMiddleware, async (req, res) => {
             .sort({ createdAt: -1 });
         res.json(recipes);
     } catch(err) {
-        res.json({ message: err.message });
+        res.status(500).json({ message: err.message });
     }
 });
 
@@ -64,23 +64,23 @@ router.put('/:id', authMiddleware, async (req, res) => {
         const recipe = await Recipe.findById(req.params.id);
 
         if(!recipe) {
-            return res.json({ message: 'Recipe not found' });
+            return res.status(404).json({ message: 'Recipe not found' });
         }
 
         if(recipe.author.toString() !== req.userId) {
-            return res.json({ message: 'You are not authorized to update this recipe' });
+            return res.status(403).json({ message: 'You are not authorized to update this recipe' });
         }
 
         const { title, description, image, ingredients, steps, cookingTime, servings, difficulty, category } = req.body;
 
         if(!title || !description || !image || !ingredients || !steps || !cookingTime || !servings || !difficulty || !category) {
-            return res.json({ message: 'All fields are required' });
+            return res.status(400).json({ message: 'All fields are required' });
         }
 
         const updatedRecipe = await Recipe.findByIdAndUpdate(req.params.id, { title, description, image, ingredients, steps, cookingTime, servings, difficulty, category }, { new: true });
         res.json(updatedRecipe);
     } catch(err) {
-        res.json({ message: err.message });
+        res.status(500).json({ message: err.message });
     }
 })
 
@@ -89,11 +89,11 @@ router.delete('/:id', authMiddleware, async (req, res) => {
         const recipe = await Recipe.findById(req.params.id);
 
         if(!recipe) {
-            return res.json({ message: 'Recipe not found' });
+            return res.status(404).json({ message: 'Recipe not found' });
         }
 
         if(recipe.author.toString() !== req.userId) {
-            return res.json({ message: 'You are not authorized to delete this recipe' });
+            return res.status(403).json({ message: 'You are not authorized to delete this recipe' });
         }
 
         await Recipe.findByIdAndDelete(req.params.id);
@@ -102,7 +102,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
 
         res.json({ message: 'Recipe deleted successfully' });
     } catch(err) {
-        res.json({ message: err.message });
+        res.status(500).json({ message: err.message });
     }
 })
 
